@@ -1198,6 +1198,8 @@ extern int ZEXPORT unzGoToFirstFile (unzFile file)
                                              &s->cur_file_info_internal,
                                              NULL,0,NULL,0,NULL,0);
     s->current_file_ok = (err == UNZ_OK);
+    if (s->cur_file_info.flag & UNZ_ENCODING_UTF8)
+        unzSetFlags(file, UNZ_ENCODING_UTF8);
     return err;
 }
 

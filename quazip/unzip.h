@@ -87,6 +87,7 @@ typedef voidp unzFile;
 
 #define UNZ_AUTO_CLOSE 0x01u
 #define UNZ_DEFAULT_FLAGS UNZ_AUTO_CLOSE
+#define UNZ_ENCODING_UTF8 0x0800u
 
 /* tm_unz contain date/time info */
 typedef struct tm_unz_s

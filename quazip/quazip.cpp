@@ -544,8 +544,8 @@ bool QuaZip::getCurrentFileInfo(QuaZipFileInfo64 *info)const
   info->diskNumberStart=info_z.disk_num_start;
   info->internalAttr=info_z.internal_fa;
   info->externalAttr=info_z.external_fa;
-  info->name=p->fileNameCodec->toUnicode(fileName);
-  info->comment=p->commentCodec->toUnicode(comment);
+  info->name=(info->flags & UNZ_ENCODING_UTF8) ? QString::fromUtf8(fileName) : p->fileNameCodec->toUnicode(fileName);
+  info->comment=(info->flags & UNZ_ENCODING_UTF8) ? QString::fromUtf8(comment) : p->commentCodec->toUnicode(comment);
   info->extra=extra;
   info->dateTime=QDateTime(
       QDate(info_z.tmu_date.tm_year, info_z.tmu_date.tm_mon+1, info_z.tmu_date.tm_mday),
@@ -565,10 +565,13 @@ QString QuaZip::getCurrentFileName()const
   }
   if(!isOpen()||!hasCurrentFile()) return QString();
   QByteArray fileName(MAX_FILE_NAME_LENGTH, 0);
-  if((fakeThis->p->zipError=unzGetCurrentFileInfo64(p->unzFile_f, NULL, fileName.data(), fileName.size(),
+  unz_file_info64 file_info;
+  if((fakeThis->p->zipError=unzGetCurrentFileInfo64(p->unzFile_f, &file_info, fileName.data(), fileName.size(),
       NULL, 0, NULL, 0))!=UNZ_OK)
     return QString();
-  QString result = p->fileNameCodec->toUnicode(fileName.constData());
+  fileName.resize(file_info.size_filename);
+  QString result = (file_info.flag & UNZ_ENCODING_UTF8)
+    ? QString::fromUtf8(fileName) : p->fileNameCodec->toUnicode(fileName);
   if (result.isEmpty())
       return result;
   // Add to directory map
